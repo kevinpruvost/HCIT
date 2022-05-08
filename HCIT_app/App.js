@@ -5,6 +5,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { TicketPickerScreen } from './TicketPicker';
+import TicketsView from './src/views/tickets/TicketsView';
 import ScanView from './src/views/scan/ScanView';
 
 function HomeScreen() {
@@ -38,6 +39,7 @@ const ICONS = {
     Settings: "settings",
     Profile:  "person",
     Test:     "flag",
+    Tickets:  "card",
     Scan:     "qr-code"
 };
 
@@ -60,6 +62,7 @@ export default function App() {
         <Tab.Screen name="Profile" component={ProfileScreen} />
         <Tab.Screen name="Settings" component={SettingsScreen} />
         <Tab.Screen name="Test" component={TicketPickerScreen} />
+        <Tab.Screen name="Tickets" component={TicketsView} />
         <Tab.Screen name="Scan" component={ScanView} />
       </Tab.Navigator>
     </NavigationContainer>
