@@ -1,10 +1,26 @@
 {
   "expo": {
-    "name": "HCIT_app",
-    "slug": "HCIT_app",
+    "name": "Quicket",
+    "slug": "Quicket",
     "version": "1.0.0",
     "assetBundlePatterns": [
       "**/*"
-    ]
+    ],
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "icon": "./local/assets/icon.png",
+          "color": "#ffffff",
+          "sounds": [
+            "./local/assets/notification-sound.wav",
+            "./local/assets/notification-sound-other.wav"
+          ]
+        }
+      ]
+    ],
+    "android": {
+      "package": "testpackage.apk"
+    }
   }
 }

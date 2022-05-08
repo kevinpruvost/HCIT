@@ -104,7 +104,7 @@ export function TicketPickerScreen() {
         });
         try {
             setLoading(true);
-            const url = `https://api.navitia.io/v1/coverage/6.173974005707584;48.68975721995908/coords/6.173974005707584;48.68975721995908/departures?${queryString}`
+            const url = `https://api.navitia.io/v1/coverage/${coords1}/coords/${coords2}/departures?${queryString}`
             setTest(url)
             const response = await fetch(url, {
                 method: 'GET',
@@ -132,11 +132,11 @@ export function TicketPickerScreen() {
     };
 
     useEffect(() => {
-        getDeparturesFromCoordinate();
+        getDeparturesFromCoordinate("6.173974005707584;48.68975721995908", "6.173974005707584;48.68975721995908");
     }, []);
     return (
       <View style={{ flex: 1, alignItems: 'center' }} scrollEnabled={true}>
-        <Button title='Reload' color='purple' onPress={async() => { getDeparturesFromCoordinate() }}>Reload</Button>
+        <Button title='Reload' color='purple' onPress={async() => { getDeparturesFromCoordinate("6.173974005707584;48.68975721995908", "6.173974005707584;48.68975721995908") }}>Reload</Button>
         {
         isLoading ?
         <Text>Loading...</Text>
