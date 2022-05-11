@@ -1,0 +1,8 @@
+{
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.88 Safari/537.36",
+    "bff_key": "ah1MPO-izehIHD-QZZ9y88n-kku876",
+    "endpoints": {
+        "itineraries": "https://www.sncf-connect.com/bff/api/v1/itineraries",
+        "autocomplete": "https://www.sncf-connect.com/bff/api/v1/autocomplete"
+    }
+}

@@ -1,0 +1,32 @@
+{
+  "expo": {
+    "name": "Quicket",
+    "icon": "./local/assets/icon.png",
+    "slug": "quicket",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "androidNavigationBar": {
+      "barStyle": "dark-content",
+      "backgroundColor": "#ffffff"
+    },
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "icon": "./local/assets/icon.png",
+          "color": "#ffffff",
+          "sounds": [
+            "./local/assets/notification-sound.wav",
+            "./local/assets/notification-sound-other.wav"
+          ]
+        }
+      ]
+    ],
+    "android": {
+      "package": "com.hcit.quicket",
+      "versionCode": 1
+    }
+  }
+}
