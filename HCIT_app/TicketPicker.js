@@ -1,9 +1,11 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, Pressable } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { FlatList, Button, ActivityIndicator, ListItem } from 'react-native';
 import {Ionicons} from 'react-native-vector-icons/Ionicons';
+import { LineView } from './LineView';
+import { TicketView } from './TicketView';
 
 const forbiddenUris = [
     "physical_mode:Tramway",
@@ -23,14 +25,26 @@ function objToQueryString(obj) {
             keyValuePairs.push(encodeURIComponent(key) + '=' + encodeURIComponent(obj[key]));
     }
     return keyValuePairs.join('&');
-  }
+}
 
 export function TicketPickerScreen() {
     const [isLoading, setLoading] = useState(true);
     const [data, setData] = useState([]);
     const [lines, setLines] = useState([]);
+    const [linesReady, setLinesReady] = useState(false);
     const [linesPerStop, setLinesPerStop] = useState({});
-    const [test, setTest] = useState([]);
+    const [linesPerStopArray, setLinesPerStopArray] = useState({});
+
+    const lines2 = []
+
+    useEffect(() => {
+        if (linesReady)
+        {
+            formStopsList()
+            setLinesReady(false)
+        }
+    }, [lines, linesReady, linesPerStop, linesPerStopArray])
+    var lines_temp = []
 
     var StopId = 0;
     function StopPoint(arrivalStation, arrivalTime) {
@@ -80,15 +94,16 @@ export function TicketPickerScreen() {
                 await setLines(prevArray => [...prevArray, line])
             }
         } catch {
-            console.log("error")
+            console.log("Retry " + arrivalStation)
             await getLineFromJourneyId(arrivalStation, departureTime, vehicleJourneyId)
         } finally {
         }
     }
 
     const formStopsList = async() => {
-        setLinesPerStop({})
+        await setLinesPerStop({})
         var linesPerStop_temp = {}
+        var linesPerStopArray_temp = []
         for (let line of lines)
         {
             for (let stop of line.stops)
@@ -96,22 +111,29 @@ export function TicketPickerScreen() {
                 const name = stop["arrivalStation"]
                 if (name in linesPerStop_temp)
                 {
-                    linesPerStop_temp[name].lines = [...linesPerStop_temp[name].lines, line]
+                    linesPerStop_temp[name].lines = [...linesPerStop_temp[name].lines, {line: line, stopArrivalTime: stop["arrivalTime"]}]
                 }
                 else
                 {
                     linesPerStop_temp[name] = {
                         stopStation: name,
-                        lines: [line]
+                        lines: [{line: line, stopArrivalTime: stop["arrivalTime"]}]
                     }
                 }
             }
         }
+        for (var key in linesPerStop_temp)
+        {
+            linesPerStopArray_temp = [...linesPerStopArray_temp, linesPerStop_temp[key]]
+        }
         await setLinesPerStop(linesPerStop_temp)
+        await setLinesPerStopArray(linesPerStopArray_temp)
+        console.log("finished STOPS")
     }
 
     const formLines = async(json) => {
-        setLines([])
+        //setLines([])
+        lines_temp = []
         for (var lineI in json.departures)
         {
             var departure = json.departures[lineI]
@@ -120,24 +142,24 @@ export function TicketPickerScreen() {
                 var link = departure.links[linkI]
                 if (link.type == "vehicle_journey")
                 {
-                    console.log("start" + parseTime(departure.stop_date_time.departure_date_time))
+                    console.log("Retrieving line from: " + departure.route.direction.stop_area.name + ": " + parseTime(departure.stop_date_time.departure_date_time))
                     await getLineFromJourneyId(departure.route.direction.stop_area.name, parseTime(departure.stop_date_time.departure_date_time), link.id)
                 }
             }
         }
+        await setLinesReady(true)
     }
 
     const getDeparturesFromCoordinate = async(coords1) => { // Lat;Lon (5.1246;1.23548)
         coords = coords1;
         const queryString = objToQueryString({
-            duration: 21600,
+            duration: 1800,
             forbidden_uris: forbiddenUris,
             count: 50
         });
         try {
             setLoading(true);
             const url = `https://api.navitia.io/v1/coverage/${coords1}/coords/${coords1}/departures?${queryString}`
-            setTest(url)
             const response = await fetch(url, {
                 method: 'GET',
                 headers: {
@@ -150,16 +172,12 @@ export function TicketPickerScreen() {
             if ("departures" in json)
             {
                 await formLines(json);
-                console.log("wtf")
-                await formStopsList();
-                //setTest(lines)
-                //setData(json.departures);
             }
             else
                 setData(json);
         } catch {
             setData("error")
-            console.error("error");
+            console.error("frites");
         } finally {
             setLoading(false);
         }
@@ -170,45 +188,81 @@ export function TicketPickerScreen() {
     }, []);
     return (
       <View style={{ flex: 1, alignItems: 'center' }} scrollEnabled={true}>
-        <Button title='Reload' color='purple' onPress={async() => { getDeparturesFromCoordinate("6.173974005707584;48.68975721995908") }}>Reload</Button>
+        <View style={{ position: 'absolute', right: '2%', top: '-8.5%' }} >
+            <Button title='Reload' color='purple' onPress={async() => { getDeparturesFromCoordinate("6.173974005707584;48.68975721995908") }}>Reload</Button>
+        </View>
         {
         isLoading ?
-        <Text>Loading...</Text>
+        <Text style={{alignContent:'center', justifyContent:'center', display: 'flex'}}>Loading...</Text>
         :
-        <View scrollEnabled={true}>
+        <View style={{width: '100%', alignItems: 'center'}} scrollEnabled={true}>
             {/* <Text scrollEnabled={true}>{JSON.stringify(test[0])}</Text> */}
-            <FlatList
-                scrollEnabled={true}
-                data={lines}
-                keyExtractor={item => item.id}
-                renderItem={({ item }) => (
-                    <ScrollView>
-                        <ScrollView horizontal={true}>
-                            <Text>{item.arrivalStation} </Text>
-                            <Text>Departure Time: {item.departureTime}</Text>
-                        </ScrollView>
-
-                        <ScrollView horizontal={true}>
-                            <Text>Line: </Text>
-                            <FlatList
-                            horizontal={true}
-                            contentContainerStyle={{paddingBottom: 15}}
-                            scrollEnabled={true}
-                            keyExtractor={item => item.id}
-                            data={item.stops}
-                            renderItem={({ item }) => (
-                                <ScrollView style={{minWidth: 100}}>
-                                    <Text>{item.arrivalStation}: </Text>
-                                    <Text>{item.arrivalTime}</Text>
-                                </ScrollView>
-                            )}
-                            />
-                        </ScrollView>
-                    </ScrollView>
-                )}
-            />
+            <View style={{width: '95%', alignItems: 'center', flexDirection: "row"}}>
+                <Text style={styles.currentStationText}>Current Station: Lunéville</Text>
+                <Text style={styles.departureText}>Departures:</Text>
+            </View>
+            <TicketView linesPerStop={linesPerStop} linesPerStopArray={linesPerStopArray} ></TicketView>
         </View>
         }
       </View>
     );
-  }
+}
+
+const styles = StyleSheet.create({
+    button: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      width: '100%',
+      paddingVertical: 12,
+      paddingHorizontal: 32,
+      marginBottom: 10,
+      borderRadius: 30,
+      backgroundColor: '#25aae1',
+    },
+    currentStationText: {
+        width: '65%',
+        textAlign: 'left',
+        alignSelf: 'auto',
+        fontSize: 12,
+        lineHeight: 21,
+        fontWeight: 'bold',
+        letterSpacing: 0.25,
+        color: 'gray',
+        padding: 10
+    },
+    departureText: {
+        width: '30%',
+        textAlign: 'right',
+        alignSelf: 'auto',
+        fontSize: 12,
+        lineHeight: 21,
+        fontWeight: 'bold',
+        letterSpacing: 0.25,
+        color: 'gray',
+        padding: 10
+    },
+    text1: {
+      textAlign: 'left',
+      fontSize: 16,
+      lineHeight: 21,
+      fontWeight: 'bold',
+      letterSpacing: 0.25,
+      color: 'white',
+    },
+    text2: {
+        alignSelf: 'flex-end',
+        textAlign: 'right',
+        fontSize: 14,
+        lineHeight: 21,
+        fontWeight: 'bold',
+        letterSpacing: 0.25,
+        color: 'white',
+      },
+    shadowProp: {
+        elevation: 10,
+        shadowColor: '#171717',
+        shadowOffset: {width: 0, height: 5},
+        shadowOpacity: 0.2,
+        shadowRadius: 5,
+      },
+});
