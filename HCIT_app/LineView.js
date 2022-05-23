@@ -14,6 +14,12 @@ export function LineView(props) {
         setArrivalStation(props.stop.stopStation)
         console.log(props.stop)
     }, [props])
+
+    function buyTicket(stop)
+    {
+        console.log(stop)
+    }
+
     return (
         <View style={{width: '100%', alignItems: 'center'}} scrollEnabled={true}>
             <FlatList
@@ -26,7 +32,7 @@ export function LineView(props) {
                         <ScrollView>
                             <Pressable
                                 style={[styles.button, styles.shadowProp]}
-                                onPress={async() => { stop = item }}
+                                onPress={async() => { buyTicket(item) }}
                             >
                                 <Text style={[styles.text1]}>{item.line.stops[0].arrivalStation} - {arrivalStation}</Text>
                                 <Text style={[styles.text2]}>{item.line.stops[0].arrivalTime} - {item.stopArrivalTime}</Text>

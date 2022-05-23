@@ -30,6 +30,8 @@ function objToQueryString(obj) {
 export const TicketPickerScreen = ({ navigation }) => {
     const [isLoading, setLoading] = useState(true);
     const [data, setData] = useState([]);
+    const [latitude, setLatitude] = useState("48.68975721995908");
+    const [longitude, setLongitude] = useState("6.173974005707584");
     const [currentStation, setCurrentStation] = useState("");
     const [lines, setLines] = useState([]);
     const [linesReady, setLinesReady] = useState(false);
@@ -37,6 +39,11 @@ export const TicketPickerScreen = ({ navigation }) => {
     const [linesPerStopArray, setLinesPerStopArray] = useState({});
 
     const lines2 = []
+
+    function RefreshView() {
+        console.log("ftg sam")
+        getDeparturesFromCoordinate(latitude, longitude);
+    }
 
     useEffect(() =>
     {
@@ -158,8 +165,13 @@ export const TicketPickerScreen = ({ navigation }) => {
 
     const getDeparturesFromCoordinate = async(latitude, longitude) => { // Lat;Lon (5.1246;1.23548)
         coords = longitude + ";" + latitude;
+        await setCurrentStation("")
+        await setLines([])
+        await setLinesReady(false)
+        await setLinesPerStop({})
+        await setLinesPerStopArray([])
         const queryString = objToQueryString({
-            duration: 24000,
+            duration: 1800,
             forbidden_uris: forbiddenUris,
             count: 50
         });
@@ -190,13 +202,10 @@ export const TicketPickerScreen = ({ navigation }) => {
     };
 
     useEffect(() => {
-        getDeparturesFromCoordinate("48.68975721995908", "6.173974005707584");
+        getDeparturesFromCoordinate(latitude, longitude);
     }, []);
     return (
       <View style={{ flex: 1, alignItems: 'center' }} scrollEnabled={true}>
-        <View style={{ position: 'absolute', right: '2%', top: '-8.5%' }} >
-            <Button title='Reload' color='purple' onPress={async() => { getDeparturesFromCoordinate("48.68975721995908", "6.173974005707584") }}>Reload</Button>
-        </View>
         {
         isLoading ?
         <Text style={{alignContent:'center', justifyContent:'center', display: 'flex'}}>Loading...</Text>
@@ -207,7 +216,7 @@ export const TicketPickerScreen = ({ navigation }) => {
                 <Text style={styles.currentStationText}>Current Station: {currentStation}</Text>
                 <Text style={styles.departureText}>Departures:</Text>
             </View>
-            <TicketView linesPerStop={linesPerStop} linesPerStopArray={linesPerStopArray} ></TicketView>
+            <TicketView linesPerStop={linesPerStop} linesPerStopArray={linesPerStopArray} refreshCallback={RefreshView} ></TicketView>
         </View>
         }
       </View>

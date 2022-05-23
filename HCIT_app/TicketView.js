@@ -10,6 +10,8 @@ export function TicketView(props) {
     const [lps, setLinesPerStop] = useState({})
     const [lpsa, setLinesPerStopArray] = useState([])
     const [stop, setStop] = useState(null)
+    const [fetching, setFetching] = useState(false)
+    const [refreshCallback, setRefreshCallback] = useState({})
 
     useFocusEffect(
         React.useCallback(() => {
@@ -27,7 +29,7 @@ export function TicketView(props) {
     useEffect(()=>{
         setLinesPerStop(props.linesPerStop)
         setLinesPerStopArray(props.linesPerStopArray)
-    }, [props])
+    }, [props, refreshCallback])
 
     BackHandler.addEventListener("hardwareBackPress", function(){
         setStop(null);
@@ -38,6 +40,8 @@ export function TicketView(props) {
         {
         stop === null ?
         <FlatList
+                onRefresh={() => { if (props.refreshCallback) props.refreshCallback()}}
+                refreshing={fetching}
                 style={{width:'90%'}}
                 contentContainerStyle={{justifyContent: 'space-around'}}
                 scrollEnabled={true}

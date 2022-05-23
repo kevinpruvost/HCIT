@@ -53,7 +53,7 @@ const ICONS = {
   HomeScreen: "home",
   Settings:   "settings",
   Profile:    "person",
-  Test:       "flag",
+  TicketPurchase:       "train",
   Test2:      "flag",
   Tickets:    "card",
   Scan:       "qr-code"
@@ -76,7 +76,7 @@ export default function App() {
     });
 
     responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
-        navigationRef.navigate('Test')
+        navigationRef.navigate('TicketPurchase')
     });
 
     return () => {
@@ -101,11 +101,13 @@ export default function App() {
         })}
       >
         <Tab.Screen
-            options={{headerShown: false}}
+            options={{headerShown: false, title: 'Home'}}
             name="HomeScreen" component={HomeScreen} />
         <Tab.Screen name="Profile" component={ProfileScreen} />
         <Tab.Screen name="Settings" component={SettingsScreen} />
-        <Tab.Screen name="Test" component={TicketPickerScreen} />
+        <Tab.Screen 
+          options={{headerShown: true, title: "Ticket Purchase"}}
+          name="TicketPurchase" component={TicketPickerScreen} />
         <Tab.Screen name="Tickets" component={TicketsView} />
         <Tab.Screen name="Scan" component={ScanView} />
         <Tab.Screen name="Test2" component={Notification} />
