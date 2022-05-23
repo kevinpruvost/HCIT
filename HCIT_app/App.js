@@ -4,9 +4,11 @@ import { Platform, StyleSheet, Text, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { TicketPickerScreen } from './TicketPicker';
+
+import HomeScreen from './src/views/home/HomeScreen';
 import TicketsView from './src/views/tickets/TicketsView';
 import ScanView from './src/views/scan/ScanView';
+import { TicketPickerScreen } from './TicketPicker';
 import { Notification } from './Notification';
 import { scheduleNotificationAsync } from 'expo-notifications';
 
@@ -21,14 +23,6 @@ Notifications.setNotificationHandler({
     shouldSetBadge: false,
   }),
 });
-
-function HomeScreen() {
-  return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text>Home!</Text>
-    </View>
-  );
-}
 
 function SettingsScreen() {
   return (
@@ -55,13 +49,13 @@ export async function PushNotification(title, body)
 const Tab = createBottomTabNavigator();
 
 const ICONS = {
-    Home:     "home",
-    Settings: "settings",
-    Profile:  "person",
-    Test:     "flag",
-    Test2:     "flag",
-    Tickets:  "card",
-    Scan:     "qr-code"
+  HomeScreen: "home",
+  Settings:   "settings",
+  Profile:    "person",
+  Test:       "flag",
+  Test2:      "flag",
+  Tickets:    "card",
+  Scan:       "qr-code"
 };
 
 export default function App() {
@@ -69,7 +63,7 @@ export default function App() {
   const [notification, setNotification] = useState(false);
   const notificationListener = useRef();
   const responseListener = useRef();
-  
+
   useEffect(() => {
     registerForPushNotificationsAsync().then(token => setExpoPushToken(token));
 
@@ -80,7 +74,6 @@ export default function App() {
     responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
       //console.log(response);
     });
-
 
     return () => {
       Notifications.removeNotificationSubscription(notificationListener.current);
@@ -102,7 +95,9 @@ export default function App() {
           tabBarInactiveTintColor: 'gray',
         })}
       >
-        <Tab.Screen name="Home" component={HomeScreen} />
+        <Tab.Screen
+            options={{headerShown: false}}
+            name="HomeScreen" component={HomeScreen} />
         <Tab.Screen name="Profile" component={ProfileScreen} />
         <Tab.Screen name="Settings" component={SettingsScreen} />
         <Tab.Screen name="Test" component={TicketPickerScreen} />
