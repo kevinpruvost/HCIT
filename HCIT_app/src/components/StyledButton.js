@@ -1,5 +1,6 @@
 import {Pressable, Text} from "react-native";
 import React, {Component} from "react";
+
 import Ionicons from "@expo/vector-icons/Ionicons";
 
 export default class StyledButton extends Component {
