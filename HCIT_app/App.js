@@ -106,7 +106,7 @@ export default function App() {
         <Tab.Screen name="Profile" component={ProfileScreen} />
         <Tab.Screen name="Settings" component={SettingsScreen} />
         <Tab.Screen 
-          options={{headerShown: true, title: "Ticket Purchase"}}
+          options={{headerShown: true, title: "Purchase", headerTitle: "Ticket Purchase"}}
           name="TicketPurchase" component={TicketPickerScreen} />
         <Tab.Screen name="Tickets" component={TicketsView} />
         <Tab.Screen name="Scan" component={ScanView} />

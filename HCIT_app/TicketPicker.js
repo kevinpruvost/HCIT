@@ -208,7 +208,7 @@ export const TicketPickerScreen = ({ navigation }) => {
       <View style={{ flex: 1, alignItems: 'center' }} scrollEnabled={true}>
         {
         isLoading ?
-        <Text style={{alignContent:'center', justifyContent:'center', display: 'flex'}}>Loading...</Text>
+        <Text style={{height: '100%', alignContent:'center', justifyContent:'center', display: 'flex', textAlignVertical: 'center'}}>Loading...</Text>
         :
         <View style={{width: '100%', alignItems: 'center'}} scrollEnabled={true}>
             {/* <Text scrollEnabled={true}>{JSON.stringify(test[0])}</Text> */}
