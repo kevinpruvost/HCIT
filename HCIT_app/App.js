@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import {React, useState, useEffect, useRef} from 'react';
+import { React, useState, useEffect, useRef } from 'react';
 import { Platform, StyleSheet, Text, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -10,12 +10,17 @@ import TicketsView from './src/views/tickets/TicketsView';
 import ScanView from './src/views/scan/ScanView';
 import { TicketPickerScreen } from './TicketPicker';
 import { Notification } from './Notification';
-import { scheduleNotificationAsync } from 'expo-notifications';
 import { navigationRef } from './RootNavigation';
 
+import * as TaskManager from "expo-task-manager";
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import * as Permissions from 'expo-permissions';
+import * as Location from "expo-location";
+
+import GetClosestStation from './GetClosestStation';
+
+const LOCATION_TASK_NAME = "background-location-task";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -41,8 +46,7 @@ function ProfileScreen() {
   );
 }
 
-export async function PushNotification(title, body)
-{
+export async function PushNotification(title, body) {
   await schedulePushNotification(title, body);
   alert("pit")
 }
@@ -51,12 +55,12 @@ const Tab = createBottomTabNavigator();
 
 const ICONS = {
   HomeScreen: "home",
-  Settings:   "settings",
-  Profile:    "person",
-  TicketPurchase:       "train",
-  Test2:      "flag",
-  Tickets:    "card",
-  Scan:       "qr-code"
+  Settings: "settings",
+  Profile: "person",
+  TicketPurchase: "train",
+  Test2: "flag",
+  Tickets: "card",
+  Scan: "qr-code"
 };
 
 export default function App() {
@@ -66,16 +70,16 @@ export default function App() {
   const responseListener = useRef();
 
   useEffect(() => {
-    registerForPushNotificationsAsync().then(token => setExpoPushToken(token));
 
-    Notifications.addNotificationsDroppedListener
+    // Notifications.addNotificationsDroppedListener();
 
     notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
       setNotification(notification);
     });
 
     responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
-        navigationRef.navigate('TicketPurchase')
+      console.log(response);
+      navigationRef.navigate('TicketPurchase')
     });
 
     return () => {
@@ -84,28 +88,44 @@ export default function App() {
     };
   }, [])
 
+  // Start background notification task
+  useEffect(() => {
+    const subscribeBackgroundTaskLocation = async () => {
+      const { status } = await Location.requestBackgroundPermissionsAsync();
+      if (status === "granted") {
+        const hasStarted = await Location.hasStartedLocationUpdatesAsync(LOCATION_TASK_NAME);
+        if (!hasStarted)
+          await Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
+            accuracy: Location.Accuracy.BestForNavigation,
+            timeInterval: 10000,
+          });
+      }
+    }
+    subscribeBackgroundTaskLocation();
+  }, []);
+
   return (
     <NavigationContainer ref={navigationRef}>
       <StatusBar hidden={false} />
       <Tab.Navigator
         backBehavior='none'
-        screenOptions={({route}) => ({
-          tabBarIcon({focused, color, size}) {
+        screenOptions={({ route }) => ({
+          tabBarIcon({ focused, color, size }) {
             const name = ICONS[route.name] + (focused ? "-outline" : "");
 
-            return <Ionicons name={name} size={size} color={color}/>;
+            return <Ionicons name={name} size={size} color={color} />;
           },
           tabBarActiveTintColor: 'purple',
           tabBarInactiveTintColor: 'gray',
         })}
       >
         <Tab.Screen
-            options={{headerShown: false, title: 'Home'}}
-            name="HomeScreen" component={HomeScreen} />
+          options={{ headerShown: false, title: 'Home' }}
+          name="HomeScreen" component={HomeScreen} />
         <Tab.Screen name="Profile" component={ProfileScreen} />
         <Tab.Screen name="Settings" component={SettingsScreen} />
-        <Tab.Screen 
-          options={{headerShown: true, title: "Purchase", headerTitle: "Ticket Purchase"}}
+        <Tab.Screen
+          options={{ headerShown: true, title: "Purchase", headerTitle: "Ticket Purchase" }}
           name="TicketPurchase" component={TicketPickerScreen} />
         <Tab.Screen name="Tickets" component={TicketsView} />
         <Tab.Screen name="Scan" component={ScanView} />
@@ -113,17 +133,6 @@ export default function App() {
       </Tab.Navigator>
     </NavigationContainer>
   );
-}
-
-async function schedulePushNotification(title, body) {
-  await Notifications.scheduleNotificationAsync({
-    content: {
-      title: title,
-      body: body,
-      data: { data: 'goes here' },
-    },
-    trigger: null,
-  });
 }
 
 async function registerForPushNotificationsAsync() {
@@ -156,6 +165,36 @@ async function registerForPushNotificationsAsync() {
 
   return token;
 }
+
+async function schedulePushNotification(title, body, data) {
+  await Notifications.scheduleNotificationAsync({
+    content: {
+      title: title,
+      body: body,
+      data: { data: data },
+    },
+    trigger: { seconds: 2 },
+  });
+}
+
+TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
+  if (error) {
+    // Error occurred - check `error.message` for more details.
+    console.log("error", error);
+    return;
+  }
+  if (data) {
+    const { locations } = data;
+    if (locations && locations.length) {
+      const location = locations.length ? locations[0].coords : null;
+      const closestStation = await GetClosestStation(location);
+      if (closestStation != undefined/* disabled for testing purposes && closestStation.distance < 500 */) {
+        await schedulePushNotification("Gare la plus proche:",
+          `${closestStation.name} à ${closestStation.distance.toFixed(0)} m`, closestStation);
+      }
+    }
+  }
+});
 
 const styles = StyleSheet.create({
   container: {

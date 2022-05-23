@@ -23,11 +23,6 @@ export default function TestingGround({ navigation }) {
       await Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
         accuracy: Location.Accuracy.BestForNavigation,
         timeInterval: 10000,
-        foregroundService: {
-          notificationTitle: "BackgroundLocation Is On",
-          notificationBody: "We are tracking your location",
-          notificationColor: "#ffce52",
-        },
       });
     }
   };
