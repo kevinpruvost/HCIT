@@ -41,7 +41,6 @@ export const TicketPickerScreen = ({ navigation }) => {
     const lines2 = []
 
     function RefreshView() {
-        console.log("ftg sam")
         getDeparturesFromCoordinate(latitude, longitude);
     }
 
@@ -139,7 +138,6 @@ export const TicketPickerScreen = ({ navigation }) => {
         }
         await setLinesPerStop(linesPerStop_temp)
         const [first, ...rest] = linesPerStopArray_temp;
-        await setCurrentStation(first.stopStation)
         await setLinesPerStopArray(rest)
         console.log("finished STOPS")
     }
@@ -150,6 +148,7 @@ export const TicketPickerScreen = ({ navigation }) => {
         for (var lineI in json.departures)
         {
             var departure = json.departures[lineI]
+            await setCurrentStation(departure.stop_point.stop_area.name);
             for (var linkI in departure.links)
             {
                 var link = departure.links[linkI]
@@ -216,7 +215,7 @@ export const TicketPickerScreen = ({ navigation }) => {
                 <Text style={styles.currentStationText}>Current Station: {currentStation}</Text>
                 <Text style={styles.departureText}>Departures:</Text>
             </View>
-            <TicketView linesPerStop={linesPerStop} linesPerStopArray={linesPerStopArray} refreshCallback={RefreshView} ></TicketView>
+            <TicketView linesPerStop={linesPerStop} linesPerStopArray={linesPerStopArray} refreshCallback={RefreshView} currentStation={currentStation} ></TicketView>
         </View>
         }
       </View>

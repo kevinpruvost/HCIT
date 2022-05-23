@@ -7,17 +7,27 @@ import {Ionicons} from 'react-native-vector-icons/Ionicons';
 
 export function LineView(props) {
     const [lines, setLines] = useState([])
+    const [currentStation, setCurrentStation] = useState("")
     const [arrivalStation, setArrivalStation] = useState("")
 
     useEffect(()=>{
         setLines(props.stop.lines)
         setArrivalStation(props.stop.stopStation)
-        console.log(props.stop)
+        setCurrentStation(props.currentStation)
     }, [props])
 
     function buyTicket(stop)
     {
-        console.log(stop)
+    }
+
+    function getArrivalTimeFromCurrentStation(stops)
+    {
+        for (var stop of stops)
+        {
+            if (stop.arrivalStation == currentStation)
+                return stop.arrivalTime;
+        }
+        return "ERROR";
     }
 
     return (
@@ -32,10 +42,10 @@ export function LineView(props) {
                         <ScrollView>
                             <Pressable
                                 style={[styles.button, styles.shadowProp]}
-                                onPress={async() => { buyTicket(item) }}
+                                onPress={async() => { buyTicket(item); console.log(item.line.stops); }}
                             >
-                                <Text style={[styles.text1]}>{item.line.stops[0].arrivalStation} - {arrivalStation}</Text>
-                                <Text style={[styles.text2]}>{item.line.stops[0].arrivalTime} - {item.stopArrivalTime}</Text>
+                                <Text style={[styles.text1]}>{currentStation} - {arrivalStation}</Text>
+                                <Text style={[styles.text2]}>{getArrivalTimeFromCurrentStation(item.line.stops)} - {item.stopArrivalTime}</Text>
                             </Pressable>
                         </ScrollView>
                     </ScrollView>

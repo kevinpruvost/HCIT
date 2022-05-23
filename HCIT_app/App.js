@@ -9,7 +9,6 @@ import HomeScreen from './src/views/home/HomeScreen';
 import TicketsView from './src/views/tickets/TicketsView';
 import ScanView from './src/views/scan/ScanView';
 import { TicketPickerScreen } from './TicketPicker';
-import { Notification } from './Notification';
 import { navigationRef } from './RootNavigation';
 
 import * as TaskManager from "expo-task-manager";
@@ -88,10 +87,18 @@ export default function App() {
     };
   }, [])
 
+  const [status, requestPermission] = Location.useBackgroundPermissions();
+
   // Start background notification task
   useEffect(() => {
     const subscribeBackgroundTaskLocation = async () => {
-      const { status } = await Location.requestBackgroundPermissionsAsync();
+      requestPermission();
+      var { status } = await Location.requestBackgroundPermissionsAsync();
+      if (status != "granted")
+      {
+        var { status } = await Location.requestForegroundPermissionsAsync();
+      }
+      console.log("check perm : " + status)
       if (status === "granted") {
         const hasStarted = await Location.hasStartedLocationUpdatesAsync(LOCATION_TASK_NAME);
         if (!hasStarted)
@@ -129,7 +136,6 @@ export default function App() {
           name="TicketPurchase" component={TicketPickerScreen} />
         <Tab.Screen name="Tickets" component={TicketsView} />
         <Tab.Screen name="Scan" component={ScanView} />
-        <Tab.Screen name="Test2" component={Notification} />
       </Tab.Navigator>
     </NavigationContainer>
   );
