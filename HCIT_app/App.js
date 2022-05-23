@@ -9,6 +9,7 @@ import TicketsView from './src/views/tickets/TicketsView';
 import ScanView from './src/views/scan/ScanView';
 import { Notification } from './Notification';
 import { scheduleNotificationAsync } from 'expo-notifications';
+import { navigationRef } from './RootNavigation';
 
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
@@ -73,12 +74,15 @@ export default function App() {
   useEffect(() => {
     registerForPushNotificationsAsync().then(token => setExpoPushToken(token));
 
+    Notifications.addNotificationsDroppedListener
+
     notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
       setNotification(notification);
+      console.log("notification received !!!!!")
     });
 
     responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
-      //console.log(response);
+        navigationRef.navigate('Test')
     });
 
 
@@ -89,9 +93,10 @@ export default function App() {
   }, [])
 
   return (
-    <NavigationContainer>
+    <NavigationContainer ref={navigationRef}>
       <StatusBar hidden={false} />
       <Tab.Navigator
+        backBehavior='none'
         screenOptions={({route}) => ({
           tabBarIcon({focused, color, size}) {
             const name = ICONS[route.name] + (focused ? "-outline" : "");

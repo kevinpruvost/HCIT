@@ -1,7 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, ScrollView, Pressable, BackHandler } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, useFocusEffect } from '@react-navigation/native';
 import { FlatList, Button, ActivityIndicator, ListItem } from 'react-native';
 import {Ionicons} from 'react-native-vector-icons/Ionicons';
 import { LineView } from './LineView';
@@ -10,6 +10,19 @@ export function TicketView(props) {
     const [lps, setLinesPerStop] = useState({})
     const [lpsa, setLinesPerStopArray] = useState([])
     const [stop, setStop] = useState(null)
+
+    useFocusEffect(
+        React.useCallback(() => {
+          const onBackPress = () => {
+            return true;
+          };
+    
+          BackHandler.addEventListener('hardwareBackPress', onBackPress);
+    
+          return () =>
+            BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+        }, [])
+    );
 
     useEffect(()=>{
         setLinesPerStop(props.linesPerStop)
@@ -25,7 +38,8 @@ export function TicketView(props) {
         {
         stop === null ?
         <FlatList
-                style={{width: '90%'}}
+                style={{width:'90%'}}
+                contentContainerStyle={{justifyContent: 'space-around'}}
                 scrollEnabled={true}
                 data={lpsa}
                 keyExtractor={item => item.stopStation}
@@ -34,7 +48,7 @@ export function TicketView(props) {
                         <ScrollView>
                             <Pressable
                                 style={[styles.button, styles.shadowProp]}
-                                onPressIn={async() => { setStop(item); }}
+                                onPress={async() => { setStop(item); }}
                             >
                                 <Text style={[styles.text1]}>{item.stopStation}</Text>
                                 <Text style={[styles.text2]}>{item.lines[0].line.departureTime}</Text>
@@ -62,7 +76,7 @@ const styles = StyleSheet.create({
       backgroundColor: '#25aae1',
     },
     text1: {
-      width: '48%',
+      width: '70%',
       textAlign: 'left',
       fontSize: 12,
       lineHeight: 21,
@@ -71,7 +85,7 @@ const styles = StyleSheet.create({
       color: 'white',
     },
     text2: {
-        width: '48%',
+        width: '30%',
         alignSelf: 'flex-end',
         textAlign: 'right',
         fontSize: 12,

@@ -26,7 +26,7 @@ export function LineView(props) {
                         <ScrollView>
                             <Pressable
                                 style={[styles.button, styles.shadowProp]}
-                                onPressIn={async() => { stop = item }}
+                                onPress={async() => { stop = item }}
                             >
                                 <Text style={[styles.text1]}>{item.line.stops[0].arrivalStation} - {arrivalStation}</Text>
                                 <Text style={[styles.text2]}>{item.line.stops[0].arrivalTime} - {item.stopArrivalTime}</Text>
@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
       backgroundColor: '#25aae1',
     },
     text1: {
-        width: '48%',
+        width: '49%',
         textAlign: 'left',
         fontSize: 12,
         lineHeight: 21,
@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
         color: 'white',
       },
       text2: {
-          width: '48%',
+          width: '49%',
           alignSelf: 'flex-end',
           textAlign: 'right',
           fontSize: 12,

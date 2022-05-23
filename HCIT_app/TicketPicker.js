@@ -27,9 +27,10 @@ function objToQueryString(obj) {
     return keyValuePairs.join('&');
 }
 
-export function TicketPickerScreen() {
+export const TicketPickerScreen = ({ navigation }) => {
     const [isLoading, setLoading] = useState(true);
     const [data, setData] = useState([]);
+    const [currentStation, setCurrentStation] = useState("");
     const [lines, setLines] = useState([]);
     const [linesReady, setLinesReady] = useState(false);
     const [linesPerStop, setLinesPerStop] = useState({});
@@ -37,13 +38,16 @@ export function TicketPickerScreen() {
 
     const lines2 = []
 
-    useEffect(() => {
+    useEffect(() =>
+    {
         if (linesReady)
         {
             formStopsList()
             setLinesReady(false)
         }
-    }, [lines, linesReady, linesPerStop, linesPerStopArray])
+
+    },
+    [lines, linesReady, linesPerStop, linesPerStopArray])
     var lines_temp = []
 
     var StopId = 0;
@@ -127,7 +131,9 @@ export function TicketPickerScreen() {
             linesPerStopArray_temp = [...linesPerStopArray_temp, linesPerStop_temp[key]]
         }
         await setLinesPerStop(linesPerStop_temp)
-        await setLinesPerStopArray(linesPerStopArray_temp)
+        const [first, ...rest] = linesPerStopArray_temp;
+        await setCurrentStation(first.stopStation)
+        await setLinesPerStopArray(rest)
         console.log("finished STOPS")
     }
 
@@ -150,16 +156,16 @@ export function TicketPickerScreen() {
         await setLinesReady(true)
     }
 
-    const getDeparturesFromCoordinate = async(coords1) => { // Lat;Lon (5.1246;1.23548)
-        coords = coords1;
+    const getDeparturesFromCoordinate = async(latitude, longitude) => { // Lat;Lon (5.1246;1.23548)
+        coords = longitude + ";" + latitude;
         const queryString = objToQueryString({
-            duration: 1800,
+            duration: 24000,
             forbidden_uris: forbiddenUris,
             count: 50
         });
         try {
             setLoading(true);
-            const url = `https://api.navitia.io/v1/coverage/${coords1}/coords/${coords1}/departures?${queryString}`
+            const url = `https://api.navitia.io/v1/coverage/${longitude};${latitude}/coords/${longitude};${latitude}/departures?${queryString}`
             const response = await fetch(url, {
                 method: 'GET',
                 headers: {
@@ -184,12 +190,12 @@ export function TicketPickerScreen() {
     };
 
     useEffect(() => {
-        getDeparturesFromCoordinate("6.173974005707584;48.68975721995908");
+        getDeparturesFromCoordinate("48.68975721995908", "6.173974005707584");
     }, []);
     return (
       <View style={{ flex: 1, alignItems: 'center' }} scrollEnabled={true}>
         <View style={{ position: 'absolute', right: '2%', top: '-8.5%' }} >
-            <Button title='Reload' color='purple' onPress={async() => { getDeparturesFromCoordinate("6.173974005707584;48.68975721995908") }}>Reload</Button>
+            <Button title='Reload' color='purple' onPress={async() => { getDeparturesFromCoordinate("48.68975721995908", "6.173974005707584") }}>Reload</Button>
         </View>
         {
         isLoading ?
@@ -198,7 +204,7 @@ export function TicketPickerScreen() {
         <View style={{width: '100%', alignItems: 'center'}} scrollEnabled={true}>
             {/* <Text scrollEnabled={true}>{JSON.stringify(test[0])}</Text> */}
             <View style={{width: '95%', alignItems: 'center', flexDirection: "row"}}>
-                <Text style={styles.currentStationText}>Current Station: Lunéville</Text>
+                <Text style={styles.currentStationText}>Current Station: {currentStation}</Text>
                 <Text style={styles.departureText}>Departures:</Text>
             </View>
             <TicketView linesPerStop={linesPerStop} linesPerStopArray={linesPerStopArray} ></TicketView>
