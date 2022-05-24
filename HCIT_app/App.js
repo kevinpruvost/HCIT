@@ -21,6 +21,26 @@ import GetClosestStation from './GetClosestStation';
 
 const LOCATION_TASK_NAME = "background-location-task";
 
+TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
+  if (error) {
+    // Error occurred - check `error.message` for more details.
+    console.log("error", error);
+    return;
+  }
+  if (data) {
+    const { locations } = data;
+    if (locations && locations.length) {
+      const location = locations.length ? locations[0].coords : null;
+      const closestStation = await GetClosestStation(location);
+      if (closestStation != undefined && closestStation.distance < 500) {
+        await schedulePushNotification("Don't forget your ticket! ✈️",
+          `${closestStation.name} à ${closestStation.distance.toFixed(0)} m`,
+          closestStation, { seconds: 2 }, "getYourTicket");
+      }
+    }
+  }
+});
+
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
@@ -91,20 +111,16 @@ export default function App() {
   useEffect(() => {
     const subscribeBackgroundTaskLocation = async () => {
       var { status } = await Location.requestBackgroundPermissionsAsync();
-      if (status != "granted")
-      {
+      if (status != "granted") {
         var { status } = await Location.requestForegroundPermissionsAsync();
         var { status } = await Location.requestBackgroundPermissionsAsync();
       }
-      console.log("check perm : " + status)
       if (status === "granted") {
         const hasStarted = await Location.hasStartedLocationUpdatesAsync(LOCATION_TASK_NAME);
-        if (!hasStarted)
-          console.log("hello")
-          await Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
-            accuracy: Location.Accuracy.BestForNavigation,
-            timeInterval: 10000,
-          });
+        await Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
+          accuracy: Location.Accuracy.BestForNavigation,
+          timeInterval: 10000,
+        });
       }
     }
     subscribeBackgroundTaskLocation();
@@ -171,35 +187,17 @@ async function registerForPushNotificationsAsync() {
   return token;
 }
 
-async function schedulePushNotification(title, body, data) {
+async function schedulePushNotification(title, body, data, trigger = { seconds: 2 }, identifier) {
   await Notifications.scheduleNotificationAsync({
     content: {
       title: title,
       body: body,
       data: { data: data },
     },
-    trigger: { seconds: 2 },
+    trigger: trigger,
+    identifier: identifier
   });
 }
-
-TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
-  if (error) {
-    // Error occurred - check `error.message` for more details.
-    console.log("error", error);
-    return;
-  }
-  if (data) {
-    const { locations } = data;
-    if (locations && locations.length) {
-      const location = locations.length ? locations[0].coords : null;
-      const closestStation = await GetClosestStation(location);
-      if (closestStation != undefined/* disabled for testing purposes && closestStation.distance < 500 */) {
-        await schedulePushNotification("Gare la plus proche:",
-          `${closestStation.name} à ${closestStation.distance.toFixed(0)} m`, closestStation);
-      }
-    }
-  }
-});
 
 const styles = StyleSheet.create({
   container: {
