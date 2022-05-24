@@ -116,9 +116,14 @@ export const TicketPickerScreen = ({ navigation }) => {
         var linesPerStopArray_temp = []
         for (let line of lines)
         {
+            // To skip useless lines
+            var ok = false;
             for (let stop of line.stops)
             {
                 const name = stop["arrivalStation"]
+                if (name == currentStation)
+                    ok = true;
+                if (!ok) continue;
                 if (name in linesPerStop_temp)
                 {
                     linesPerStop_temp[name].lines = [...linesPerStop_temp[name].lines, {line: line, stopArrivalTime: stop["arrivalTime"]}]
