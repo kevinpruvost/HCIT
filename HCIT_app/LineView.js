@@ -21,6 +21,10 @@ export function LineView(props) {
         setLines(props.stop.lines)
         setArrivalStation(props.stop.stopStation)
         setCurrentStation(props.currentStation)
+        if (props.stop.lines.length == 1)
+        {
+            buyTicket(props.stop.lines[0])
+        }
     }, [props])
 
     async function GetCode(station)
