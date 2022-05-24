@@ -14,6 +14,7 @@ export default class PurchaseWebView extends Component {
                 this.props.route.params
             )
         };
+        console.log(this.state.url);
     }
 
     render() {

@@ -49,6 +49,10 @@ export default class HomeView extends Component {
     }
 
     openPage(label, code) {
+        console.log(this.state.origin);
+        console.log(destinations[this.state.origin]);
+        console.log(label);
+        console.log(code);
         this.props.navigation.push(
             "PurchaseWebView",
             {

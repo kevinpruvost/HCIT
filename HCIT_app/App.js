@@ -87,21 +87,20 @@ export default function App() {
     };
   }, [])
 
-  const [status, requestPermission] = Location.useBackgroundPermissions();
-
   // Start background notification task
   useEffect(() => {
     const subscribeBackgroundTaskLocation = async () => {
-      requestPermission();
       var { status } = await Location.requestBackgroundPermissionsAsync();
       if (status != "granted")
       {
         var { status } = await Location.requestForegroundPermissionsAsync();
+        var { status } = await Location.requestBackgroundPermissionsAsync();
       }
       console.log("check perm : " + status)
       if (status === "granted") {
         const hasStarted = await Location.hasStartedLocationUpdatesAsync(LOCATION_TASK_NAME);
         if (!hasStarted)
+          console.log("hello")
           await Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
             accuracy: Location.Accuracy.BestForNavigation,
             timeInterval: 10000,

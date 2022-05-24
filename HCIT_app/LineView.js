@@ -1,14 +1,21 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, ScrollView, Pressable } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, Pressable, Linking } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { FlatList, Button, ActivityIndicator, ListItem } from 'react-native';
 import {Ionicons} from 'react-native-vector-icons/Ionicons';
+import Utils from './src/Utils';
+import destinations from "./resources/popular-destinations.json";
+
 
 export function LineView(props) {
     const [lines, setLines] = useState([])
     const [currentStation, setCurrentStation] = useState("")
     const [arrivalStation, setArrivalStation] = useState("")
+
+    const url = "https://www.sncf-connect.com/app/home/search"
+    const autocompleteUrl = "https://www.sncf-connect.com/bff/api/v1/autocomplete"
+    const autocompleteBffKey = "ah1MPO-izehIHD-QZZ9y88n-kku876"
 
     useEffect(()=>{
         setLines(props.stop.lines)
@@ -16,8 +23,46 @@ export function LineView(props) {
         setCurrentStation(props.currentStation)
     }, [props])
 
-    function buyTicket(stop)
+    async function GetCode(station)
     {
+        try {
+            const body = {
+                searchTerm: station,
+                keepStationsOnly: false
+            }
+            const response = await fetch(autocompleteUrl, {
+                method: 'POST',
+                headers: {
+                    'Accept': '*/*',
+                    'Accept-Encoding': 'gzip, deflate, br',
+                    'Content-Type': 'application/json',
+                    'x-bff-key': autocompleteBffKey
+                },
+                body: JSON.stringify(body)
+            })
+            const json = await response.json();
+            console.log(json.places.transportPlaces[0].id)
+            return json.places.transportPlaces[0].id
+        } catch (e) {
+            console.log("error get code")
+            console.log(e)
+            return undefined;
+        } finally {
+            console.log("get code finished")
+        }
+    }
+
+    async function buyTicket(stop)
+    {
+        var params = 
+        {
+            originLabel:      currentStation,
+            originId:         await GetCode(currentStation),
+            destinationLabel: arrivalStation,
+            destinationId:    await GetCode(arrivalStation)
+        };
+        var fullUrl = url + Utils.buildUrlParams(params);
+        await Linking.openURL(fullUrl);
     }
 
     function getArrivalTimeFromCurrentStation(stops)
@@ -42,7 +87,7 @@ export function LineView(props) {
                         <ScrollView>
                             <Pressable
                                 style={[styles.button, styles.shadowProp]}
-                                onPress={async() => { buyTicket(item); console.log(item.line.stops); }}
+                                onPress={async() => { buyTicket(item); }}
                             >
                                 <Text style={[styles.text1]}>{currentStation} - {arrivalStation}</Text>
                                 <Text style={[styles.text2]}>{getArrivalTimeFromCurrentStation(item.line.stops)} - {item.stopArrivalTime}</Text>

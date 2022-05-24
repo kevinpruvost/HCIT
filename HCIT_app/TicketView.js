@@ -2,7 +2,7 @@ import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, ScrollView, Pressable, BackHandler } from 'react-native';
 import { NavigationContainer, useFocusEffect } from '@react-navigation/native';
-import { FlatList, Button, ActivityIndicator, ListItem } from 'react-native';
+import { Linking, FlatList, Button, ActivityIndicator, ListItem } from 'react-native';
 import {Ionicons} from 'react-native-vector-icons/Ionicons';
 import { LineView } from './LineView';
 
