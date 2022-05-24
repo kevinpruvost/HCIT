@@ -170,7 +170,7 @@ export const TicketPickerScreen = ({ navigation }) => {
         await setLinesPerStop({})
         await setLinesPerStopArray([])
         const queryString = objToQueryString({
-            duration: 21600,
+            duration: 1800,
             forbidden_uris: forbiddenUris,
             count: 50
         });
