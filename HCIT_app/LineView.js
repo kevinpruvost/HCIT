@@ -9,23 +9,20 @@ import destinations from "./resources/popular-destinations.json";
 
 
 export function LineView(props) {
-    const [lines, setLines] = useState([])
-    const [currentStation, setCurrentStation] = useState("")
-    const [arrivalStation, setArrivalStation] = useState("")
+    const [lines, setLines] = useState(props.stop.lines)
+    const [currentStation, setCurrentStation] = useState(props.currentStation)
+    const [arrivalStation, setArrivalStation] = useState(props.stop.stopStation)
 
     const url = "https://www.sncf-connect.com/app/home/search"
     const autocompleteUrl = "https://www.sncf-connect.com/bff/api/v1/autocomplete"
     const autocompleteBffKey = "ah1MPO-izehIHD-QZZ9y88n-kku876"
 
     useEffect(()=>{
-        setLines(props.stop.lines)
-        setArrivalStation(props.stop.stopStation)
-        setCurrentStation(props.currentStation)
         if (props.stop.lines.length == 1)
         {
             buyTicket(props.stop.lines[0])
         }
-    }, [props])
+    },[props, lines, currentStation, arrivalStation])
 
     async function GetCode(station)
     {
