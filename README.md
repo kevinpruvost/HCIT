@@ -1,2 +1,3 @@
-# HCIT
-HCIT Project
+# Quicket
+
+![logo](./HCIT_app/resources/logo.png)
