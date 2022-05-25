@@ -7,11 +7,11 @@ import {Ionicons} from 'react-native-vector-icons/Ionicons';
 import { LineView } from './LineView';
 
 export function TicketView(props) {
-    const [lps, setLinesPerStop] = useState({})
-    const [lpsa, setLinesPerStopArray] = useState([])
+    const [lps, setLinesPerStop] = useState(props.linesPerStop)
+    const [lpsa, setLinesPerStopArray] = useState(props.linesPerStopArray)
     const [stop, setStop] = useState(null)
     const [fetching, setFetching] = useState(false)
-    const [currentStation, setCurrentStation] = useState("")
+    const [currentStation, setCurrentStation] = useState(props.currentStation)
 
     useFocusEffect(
         React.useCallback(() => {
@@ -40,6 +40,7 @@ export function TicketView(props) {
         <View style={{width: '100%', alignItems: 'center'}} scrollEnabled={true}>
         {
         stop === null ?
+        lpsa.length != [] ?
         <FlatList
                 onRefresh={() => { if (props.refreshCallback) props.refreshCallback()}}
                 refreshing={fetching}
@@ -62,6 +63,8 @@ export function TicketView(props) {
                     </ScrollView>
                 )}
             />
+        :
+        <Button onPress={() => { if (props.refreshCallback) props.refreshCallback() }} title="Refresh"></Button>
         :
         <LineView stop={stop} currentStation={currentStation}></LineView>
         }

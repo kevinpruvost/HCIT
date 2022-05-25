@@ -6,6 +6,7 @@ import { FlatList, Button, ActivityIndicator, ListItem } from 'react-native';
 import {Ionicons} from 'react-native-vector-icons/Ionicons';
 import { LineView } from './LineView';
 import { TicketView } from './TicketView';
+import * as Location from "expo-location";
 
 const forbiddenUris = [
     "physical_mode:Tramway",
@@ -30,8 +31,6 @@ function objToQueryString(obj) {
 export const TicketPickerScreen = ({ navigation }) => {
     const [isLoading, setLoading] = useState(true);
     const [data, setData] = useState([]);
-    const [latitude, setLatitude] = useState("48.68975721995908");
-    const [longitude, setLongitude] = useState("6.173974005707584");
     const [currentStation, setCurrentStation] = useState("");
     const [lines, setLines] = useState([]);
     const [linesReady, setLinesReady] = useState(false);
@@ -39,8 +38,16 @@ export const TicketPickerScreen = ({ navigation }) => {
     const [linesPerStopArray, setLinesPerStopArray] = useState({});
 
     const lines2 = []
+    var latitude = "48.68975721995908"
+    var longitude = "6.173974005707584"
 
-    function RefreshView() {
+    async function RefreshView() {
+        var position = await Location.getCurrentPositionAsync({});
+        console.log(position);
+        latitude = position.coords.latitude;
+        longitude = position.coords.longitude;
+        console.log(latitude)
+        console.log(longitude)
         getDeparturesFromCoordinate(latitude, longitude);
     }
 
@@ -206,7 +213,7 @@ export const TicketPickerScreen = ({ navigation }) => {
     };
 
     useEffect(() => {
-        getDeparturesFromCoordinate(latitude, longitude);
+        RefreshView();
     }, []);
     return (
       <View style={{ flex: 1, alignItems: 'center' }} scrollEnabled={true}>

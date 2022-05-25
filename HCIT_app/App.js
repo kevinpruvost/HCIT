@@ -30,6 +30,8 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
   if (data) {
     const { locations } = data;
     if (locations && locations.length) {
+      console.log("position: ")
+      console.log(locations[0].coords)
       const location = locations.length ? locations[0].coords : null;
       const closestStation = await GetClosestStation(location);
       if (closestStation != undefined && closestStation.distance < 500) {
